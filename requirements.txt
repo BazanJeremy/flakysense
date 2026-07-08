@@ -1,0 +1,5 @@
+pydantic>=2.7
+pytest>=8.0
+# Added as needed in S1/S2 (keep minimal — every dependency must earn its place):
+# flask>=3.0
+# hypothesis>=6.100

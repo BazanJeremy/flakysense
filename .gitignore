@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+htmlcov/
+.coverage
+data/*
+!data/samples/
+allure-results/
+allure-report/
+*.log
+.env
