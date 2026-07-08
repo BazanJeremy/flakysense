@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Flaky test intelligence agent"
 requires-python = ">=3.12"
 
+[project.scripts]
+flakysense = "flakysense.cli:main"
+
 [project.optional-dependencies]
 # System 2 enhancement layer (ADR-004) — never required by tests or CI.
 llm = ["anthropic>=0.40"]
