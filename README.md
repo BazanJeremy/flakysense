@@ -16,7 +16,7 @@ pattern ([ADR-001](docs/adr/ADR-001-orchestration-pattern.md)):
 | Stage | Agent | System | Role |
 |---|---|---|---|
 | 1 | `DetectorAgent` | System 1 — deterministic, always runs | Scores flakiness: intermittency + flip rate + duration instability ([ADR-002](docs/adr/ADR-002-flakiness-scoring-heuristic.md)) |
-| 2 | `ClassifierAgent` | System 1 — deterministic, always runs | Assigns a probable root-cause category |
+| 2 | `ClassifierAgent` | System 1 — deterministic, always runs | Names the probable cause: duration outliers, order splits, environment diffs ([ADR-003](docs/adr/ADR-003-cause-classification-heuristics.md)) |
 | 3 | `ExplainerAgent` | System 2 — LLM with deterministic fallback | Produces a root-cause narrative |
 | 4 | `RecommenderAgent` | System 2 — LLM with deterministic fallback | Suggests a concrete corrective action |
 
