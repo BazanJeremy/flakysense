@@ -53,6 +53,24 @@ flakysense data/samples/ci_runs
 flakysense data/samples/ci_runs --json
 ```
 
+## Docker
+
+The image packages the CLI as a one-shot analysis job
+([ADR-007](docs/adr/ADR-007-container-packaging-scope.md)); CI never uses
+it — the core suite stays Docker-free by design.
+
+```powershell
+# analyze the bundled sample history (builds the image on first run)
+docker compose run --rm flakysense
+
+# analyze your own CI artifacts
+docker run --rm -v C:\path\to\reports:/runs:ro flakysense
+```
+
+Exit codes propagate (ADR-006), so a pipeline can gate on flakiness directly.
+Set `ANTHROPIC_API_KEY` in the environment to enable the System 2 LLM path —
+the image already bundles the optional SDK.
+
 ## License
 
 MIT

@@ -1,0 +1,16 @@
+# Demo harness for the containerized CLI (ADR-007):
+#
+#     docker compose run --rm flakysense
+#
+# analyzes the bundled sample history. Point the volume at any directory of
+# junit.xml reports to analyze real CI artifacts. Exit codes follow ADR-006.
+services:
+  flakysense:
+    build: .
+    image: flakysense
+    volumes:
+      - ./data/samples/ci_runs:/runs:ro
+    environment:
+      # Optional System 2 enhancement (ADR-004): unset or empty means every
+      # stage runs its deterministic fallback — no key ever required.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
