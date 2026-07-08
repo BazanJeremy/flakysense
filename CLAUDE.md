@@ -51,6 +51,7 @@ Differentiating skills this project must showcase (vs P1–P3): log parsing at s
 
 - Codebase, comments, README, ADRs: **professional English** (Swiss/international market). Conversation with the user: French.
 - Commits: small, atomic, imperative English (`feat: …`, `test: …`, `docs: adr-002 …`).
+- Branch workflow (since S2, user decision 2026-07-08): never commit to `main` directly. Each session works on a feature branch (`feat/…`, `docs/…`, `fix/…`) keeping its atomic commits, then opens a GitHub PR to `main` — even solo, for portfolio hygiene and CI-gated merges.
 - Targeted changes only. The user runs everything locally and pastes exact errors — fix precisely, never rewrite broadly.
 - Never scan `.venv/`, `data/` beyond `data/samples/`, or generated report folders (token waste).
 
