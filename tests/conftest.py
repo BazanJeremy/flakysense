@@ -7,6 +7,14 @@ import pytest
 from flakysense.models import TestRunRecord, TestStatus
 
 
+@pytest.fixture(autouse=True)
+def _no_llm_env(monkeypatch):
+    # The suite must never touch an LLM (ADR-004): scrub the activation key
+    # so System 2 agents resolve to their deterministic fallback, even on a
+    # developer machine that has a real key configured.
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+
 @pytest.fixture
 def record_factory():
     """Build valid ``TestRunRecord`` instances with overridable defaults."""
