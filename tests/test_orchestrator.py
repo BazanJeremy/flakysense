@@ -91,6 +91,33 @@ def test_escalation_gates_the_llm_attempt():
         assert reports[test_id].recommendation == recommender_fake.reply
 
 
+def test_lower_threshold_override_escalates_the_borderline_test():
+    fake = FakeLLMClient()
+    orchestrator = Orchestrator(
+        explainer=ExplainerAgent(llm_client=fake),
+        recommender=RecommenderAgent(llm_client=FakeLLMClient()),
+        escalation_threshold=DetectorAgent.DETECTION_THRESHOLD,
+    )
+
+    reports = orchestrator.run(parse_junit_dir(CI_RUNS))
+
+    assert all(r.generated_by == "system2_llm" for r in reports)
+
+
+def test_threshold_above_one_disables_escalation():
+    fake = FakeLLMClient()
+    orchestrator = Orchestrator(
+        explainer=ExplainerAgent(llm_client=fake),
+        recommender=RecommenderAgent(llm_client=fake),
+        escalation_threshold=1.1,
+    )
+
+    reports = orchestrator.run(parse_junit_dir(CI_RUNS))
+
+    assert fake.calls == []
+    assert all(r.generated_by == "system1_fallback" for r in reports)
+
+
 def test_llm_failure_degrades_escalated_reports_to_fallback():
     broken = FakeLLMClient(error=ConnectionError("network down"))
     orchestrator = Orchestrator(
