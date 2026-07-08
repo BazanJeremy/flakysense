@@ -1,0 +1,30 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.2.0, pluggy-1.5.0
+rootdir: /home/runner/work/shopapp/shopapp
+configfile: pyproject.toml
+plugins: randomly-3.15.0
+Using --randomly-seed=2417
+collected 5 items
+
+tests/test_checkout.py .                                                 [ 20%]
+tests/test_payment.py F                                                  [ 40%]
+tests/test_data_import.py .                                              [ 60%]
+tests/test_users.py F                                                    [ 80%]
+tests/test_reports.py .                                                  [100%]
+
+=================================== FAILURES ===================================
+_________________________ test_payment_gateway_timeout _________________________
+
+tests/test_payment.py:47: in test_payment_gateway_timeout
+    response = gateway.charge(order, timeout=5.0)
+E   TimeoutError: payment gateway did not respond within 5.0s
+___________________________ test_user_profile_cache ____________________________
+
+tests/test_users.py:88: in test_user_profile_cache
+    assert profile.email == "u-1042@example.test"
+E   AssertionError: expected fresh profile for user 'u-1042', found stale cached entry
+E   (cache was pre-populated by tests/test_data_import.py::test_bulk_import)
+=========================== short test summary info ============================
+FAILED tests/test_payment.py::test_payment_gateway_timeout - TimeoutError: p...
+FAILED tests/test_users.py::test_user_profile_cache - AssertionError: expect...
+========================= 2 failed, 3 passed in 9.42s ==========================
