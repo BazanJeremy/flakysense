@@ -2,7 +2,7 @@
 
 > Flaky test intelligence agent — detect, classify, and explain flaky tests from CI run history using log analysis, temporal correlation, and multi-step AI agent orchestration.
 
-**Status:** 🚧 Sprint S1 — Architecture & scaffolding.
+**Status:** 🚧 Sprint S3 — Integration & hardening.
 
 ## Why
 

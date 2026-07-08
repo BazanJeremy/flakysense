@@ -5,8 +5,8 @@
 
 ## Project State — READ FIRST
 
-- **Status: 🚧 ACTIVE — Phase 2 (Implementation, Sprint S2).**
-- S1 delivered (2026-07-08): ADR-001 accepted, Pydantic v2 models, four agent interfaces with deterministic fallback stubs, synthetic fixtures (10 CI runs), contract tests. S2 lands real agent logic one agent at a time: detection → classification → explanation. Build order is owned by Claude within the agreed scope.
+- **Status: 🚧 ACTIVE — Phase 2 (Integration & hardening, Sprint S3).**
+- S1 delivered (2026-07-08): ADR-001 accepted, Pydantic v2 models, four agent interfaces with deterministic fallback stubs, synthetic fixtures (10 CI runs), contract tests. S2 delivered (2026-07-08): all four agents live (detector, classifier, explainer, recommender; ADR-002–004), JUnit ingestion, env-gated LLM layer, GitHub Actions CI. S3 lands integration one concern at a time: orchestrator → CLI → docker-compose → senior README + bug evidence. Build order is owned by Claude within the agreed scope.
 - Work in **small, session-scoped increments**: one agent / one concern per session. Do not implement multiple agents in a single pass.
 - Plan before writing code on any non-trivial task. Get the plan validated, then execute.
 
