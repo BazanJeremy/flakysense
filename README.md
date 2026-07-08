@@ -2,7 +2,7 @@
 
 > Flaky test intelligence agent — detect, classify, and explain flaky tests from CI run history using log analysis, temporal correlation, and multi-step AI agent orchestration.
 
-**Status:** 🚧 Sprint S1 — Architecture & scaffolding.
+**Status:** 🚧 Sprint S3 — Integration & hardening.
 
 ## Why
 
@@ -20,8 +20,12 @@ pattern ([ADR-001](docs/adr/ADR-001-orchestration-pattern.md)):
 | 3 | `ExplainerAgent` | System 2 — LLM with deterministic fallback | Root-cause narrative grounded in System 1 evidence ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md)) |
 | 4 | `RecommenderAgent` | System 2 — LLM with deterministic fallback | Corrective action tailored from a per-cause playbook floor ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md)) |
 
-System 2 is engaged only above the flakiness-score threshold and degrades to
-its rule-based fallback, so the full pipeline runs with **zero API keys**.
+The `Orchestrator` (`src/flakysense/orchestrator.py`) chains the four stages
+and assembles one `FlakinessReport` per flaky test. It owns the escalation
+decision ([ADR-005](docs/adr/ADR-005-system2-escalation-threshold.md)):
+System 2's LLM path is attempted only at or above a flakiness score of 0.5,
+and every stage degrades to its rule-based fallback, so the full pipeline
+runs with **zero API keys**.
 To enable the LLM enhancement layer: `pip install -e .[llm]` and set
 `ANTHROPIC_API_KEY` — nothing else changes; without it every stage runs its
 deterministic path.
