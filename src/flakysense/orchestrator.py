@@ -38,6 +38,7 @@ class Orchestrator:
         classifier: ClassifierAgent | None = None,
         explainer: ExplainerAgent | None = None,
         recommender: RecommenderAgent | None = None,
+        escalation_threshold: float | None = None,
     ) -> None:
         # None = build the default agent; inject in tests.
         self._detector = detector if detector is not None else DetectorAgent()
@@ -45,6 +46,13 @@ class Orchestrator:
         self._explainer = explainer if explainer is not None else ExplainerAgent()
         self._recommender = (
             recommender if recommender is not None else RecommenderAgent()
+        )
+        # Out-of-range values are semantics, not errors (ADR-006): > 1
+        # disables escalation entirely, <= 0 escalates every flaky test.
+        self._escalation_threshold = (
+            escalation_threshold
+            if escalation_threshold is not None
+            else self.ESCALATION_THRESHOLD
         )
 
     def run(self, records: list[TestRunRecord]) -> list[FlakinessReport]:
@@ -59,7 +67,7 @@ class Orchestrator:
                 continue
 
             classification = self._classifier.run(detection)
-            escalate = detection.score >= self.ESCALATION_THRESHOLD
+            escalate = detection.score >= self._escalation_threshold
 
             explainer_input = (detection, classification)
             explanation = (

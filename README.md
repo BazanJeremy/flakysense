@@ -29,6 +29,10 @@ runs with **zero API keys**.
 To enable the LLM enhancement layer: `pip install -e .[llm]` and set
 `ANTHROPIC_API_KEY` — nothing else changes; without it every stage runs its
 deterministic path.
+The `flakysense` CLI ([ADR-006](docs/adr/ADR-006-cli-contract.md)) wraps the
+pipeline for terminals and CI: grep-style exit codes (`0` clean, `1` flaky
+tests found, `2` analysis error) and a `--json` mode serialized directly
+from the Pydantic models.
 Shared data models live in `src/flakysense/models.py` (Pydantic v2); JUnit
 XML ingestion in `src/flakysense/ingest/` turns CI artifacts into run
 records; synthetic CI-run fixtures in `data/samples/` (see its README).
@@ -41,6 +45,12 @@ python -m venv .venv
 pip install -r requirements.txt
 pip install -e .
 python -m pytest
+
+# analyze the bundled sample CI history
+flakysense data/samples/ci_runs
+
+# machine-readable output, e.g. for a CI step or a dashboard
+flakysense data/samples/ci_runs --json
 ```
 
 ## License
