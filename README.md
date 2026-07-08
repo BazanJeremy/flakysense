@@ -17,11 +17,14 @@ pattern ([ADR-001](docs/adr/ADR-001-orchestration-pattern.md)):
 |---|---|---|---|
 | 1 | `DetectorAgent` | System 1 — deterministic, always runs | Scores flakiness: intermittency + flip rate + duration instability ([ADR-002](docs/adr/ADR-002-flakiness-scoring-heuristic.md)) |
 | 2 | `ClassifierAgent` | System 1 — deterministic, always runs | Names the probable cause: duration outliers, order splits, environment diffs ([ADR-003](docs/adr/ADR-003-cause-classification-heuristics.md)) |
-| 3 | `ExplainerAgent` | System 2 — LLM with deterministic fallback | Produces a root-cause narrative |
+| 3 | `ExplainerAgent` | System 2 — LLM with deterministic fallback | Root-cause narrative grounded in System 1 evidence ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md)) |
 | 4 | `RecommenderAgent` | System 2 — LLM with deterministic fallback | Suggests a concrete corrective action |
 
 System 2 is engaged only above the flakiness-score threshold and degrades to
 its rule-based fallback, so the full pipeline runs with **zero API keys**.
+To enable the LLM enhancement layer: `pip install -e .[llm]` and set
+`ANTHROPIC_API_KEY` — nothing else changes; without it every stage runs its
+deterministic path.
 Shared data models live in `src/flakysense/models.py` (Pydantic v2); JUnit
 XML ingestion in `src/flakysense/ingest/` turns CI artifacts into run
 records; synthetic CI-run fixtures in `data/samples/` (see its README).
