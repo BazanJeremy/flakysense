@@ -5,8 +5,8 @@
 
 ## Project State — READ FIRST
 
-- **Status: 🚧 ACTIVE — Phase 1 (Architecture & Scaffolding, Sprint S1).**
-- Nothing is implemented yet beyond this scaffold. Build order is owned by Claude within the agreed scope.
+- **Status: 🚧 ACTIVE — Phase 2 (Implementation, Sprint S2).**
+- S1 delivered (2026-07-08): ADR-001 accepted, Pydantic v2 models, four agent interfaces with deterministic fallback stubs, synthetic fixtures (10 CI runs), contract tests. S2 lands real agent logic one agent at a time: detection → classification → explanation. Build order is owned by Claude within the agreed scope.
 - Work in **small, session-scoped increments**: one agent / one concern per session. Do not implement multiple agents in a single pass.
 - Plan before writing code on any non-trivial task. Get the plan validated, then execute.
 
@@ -27,9 +27,9 @@ Differentiating skills this project must showcase (vs P1–P3): log parsing at s
 - **S2 — Implementation**: agents one by one, each landing with its tests and its rule-based fallback. Detection first, then classification, then explanation.
 - **S3 — Integration & hardening**: orchestrator, CLI/dashboard entry point, docker-compose, GitHub Actions CI, senior README, bug-evidence documentation.
 
-## Reserved ADR — Important
+## Reserved ADR — Resolved
 
-**ADR-001 (System 1 / System 2 orchestration pattern, inspired by LinkedIn Engineering's autonomous QA agent)** is deliberately reserved to be written **during the Phase 1 working session with the user**, not generated in advance. A placeholder exists in `docs/adr/ADR-001-RESERVED.md`. Do not write its content unprompted.
+**ADR-001 (System 1 / System 2 orchestration pattern)** was co-written with the user during the Phase 1 session (2026-07-08) and is **Accepted**: `docs/adr/ADR-001-orchestration-pattern.md`. The reservation is fulfilled; subsequent ADRs follow the normal flow (proposed in-session, validated by the user before commit).
 
 ## Architecture Principles (non-negotiable, portfolio-wide)
 
