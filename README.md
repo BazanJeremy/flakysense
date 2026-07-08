@@ -18,7 +18,7 @@ pattern ([ADR-001](docs/adr/ADR-001-orchestration-pattern.md)):
 | 1 | `DetectorAgent` | System 1 — deterministic, always runs | Scores flakiness: intermittency + flip rate + duration instability ([ADR-002](docs/adr/ADR-002-flakiness-scoring-heuristic.md)) |
 | 2 | `ClassifierAgent` | System 1 — deterministic, always runs | Names the probable cause: duration outliers, order splits, environment diffs ([ADR-003](docs/adr/ADR-003-cause-classification-heuristics.md)) |
 | 3 | `ExplainerAgent` | System 2 — LLM with deterministic fallback | Root-cause narrative grounded in System 1 evidence ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md)) |
-| 4 | `RecommenderAgent` | System 2 — LLM with deterministic fallback | Suggests a concrete corrective action |
+| 4 | `RecommenderAgent` | System 2 — LLM with deterministic fallback | Corrective action tailored from a per-cause playbook floor ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md)) |
 
 System 2 is engaged only above the flakiness-score threshold and degrades to
 its rule-based fallback, so the full pipeline runs with **zero API keys**.
