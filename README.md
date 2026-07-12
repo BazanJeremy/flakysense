@@ -1,22 +1,67 @@
 # FlakySense
 
-> Flaky test intelligence agent — detects, classifies, and explains flaky
-> tests from CI run history using log analysis, temporal correlation, and
-> multi-step AI agent orchestration.
+> Diagnostic d'instabilité de suite de tests — détecte, classifie et explique
+> les tests flaky à partir de l'historique CI, par analyse statistique
+> déterministe, augmentée d'une couche IA optionnelle.
 
-**Status:** ✅ Complete — three sprints delivered (architecture,
-implementation, integration & hardening). Project P4 of a 6-project AI Test
-Engineering portfolio.
+🇬🇧 [English version](README.en.md)
 
-## Why
+## Le problème
 
-Flaky tests erode trust in CI signals and waste engineering time. FlakySense
-turns raw JUnit run history into an actionable diagnosis: a flakiness score,
-a probable root cause, an evidence-grounded explanation, and a concrete
-corrective action — with a fully deterministic fallback at every stage, so
-the entire pipeline runs in CI with **zero API keys**.
+Un test flaky échoue puis repasse sans qu'une ligne de code ait changé. Le
+coût réel n'est pas le test lui-même : c'est la fiabilité CI qui s'effondre.
+Un pipeline rouge ne veut plus dire « défaut » mais « relance le job », les
+re-runs en aveugle deviennent la norme, et les vraies régressions se cachent
+dans le bruit. Le temps d'ingénieur part dans le tri manuel au lieu de la
+correction.
 
-## What it does
+FlakySense transforme un historique de rapports JUnit en diagnostic
+actionnable : un score de flakiness, une cause probable, une explication
+fondée sur les preuves et une action corrective — lisibles par un lead QA,
+ou consommés directement par le pipeline.
+
+## L'approche : la statistique décide, l'IA raconte
+
+Un pipeline de quatre agents suivant le pattern System 1 / System 2
+([ADR-001](docs/adr/ADR-001-orchestration-pattern.md)) : du déterminisme là
+où passe le volume, du raisonnement LLM là où est la valeur.
+
+```mermaid
+flowchart LR
+    A["Historique junit.xml"] --> B["Ingestion"]
+    B --> C["Détecteur\n(System 1)"]
+    C --> D["Classifieur\n(System 1)"]
+    D --> E{"score ≥ 0.5 ?"}
+    E -- "escalade" --> F["Explication → Recommandation\n(System 2 : LLM, repli garanti)"]
+    E -- "reste déterministe" --> G["Explication → Recommandation\n(règles uniquement)"]
+    F --> H["Rapport de flakiness"]
+    G --> H
+```
+
+**La décision « ce test est-il flaky ? » est 100 % déterministe**
+([ADR-002](docs/adr/ADR-002-flakiness-scoring-heuristic.md)). Le score
+combine trois signaux :
+
+- **intermittence** (pondération 0.4) — maximale à 50 % d'échec ; un test
+  qui échoue toujours est cassé, pas flaky ;
+- **taux de bascule** (0.4) — alternances pass/fail entre runs consécutifs ;
+- **instabilité de durée** (0.2) — dispersion relative des temps d'exécution.
+
+Le score est amorti sous 4 runs d'historique : peu de données, pas de verdict
+confiant. La classification de la cause — timing, ordre d'exécution,
+environnement, contention de ressources — est tout aussi déterministe
+([ADR-003](docs/adr/ADR-003-cause-classification-heuristics.md)) : chaque
+heuristique score indépendamment, la plus forte gagne, et sous un plancher de
+confiance le classifieur répond `unknown`. Il ne devine jamais.
+
+**L'IA n'intervient que sur la narration.** Explication et recommandation
+peuvent passer par un LLM, uniquement si le score atteint 0.5 et qu'une clé
+API est configurée ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md),
+[ADR-005](docs/adr/ADR-005-system2-escalation-threshold.md)). Chaque étage a
+un repli déterministe : la suite complète (60 tests) et la CI tournent avec
+**zéro clé API**, et la sortie garde exactement la même forme.
+
+## Ce que ça rend
 
 ```
 $ flakysense data/samples/ci_runs
@@ -33,124 +78,68 @@ tests/test_users.py::test_user_profile_cache
   ...
 ```
 
-Exit codes follow the grep convention
-([ADR-006](docs/adr/ADR-006-cli-contract.md)): `0` = no flaky test,
-`1` = flaky tests found — so a pipeline can gate on flakiness directly —
-`2` = analysis error. `--json` emits the same reports serialized straight
-from the Pydantic models, full run evidence included.
+- **Codes de sortie convention grep**
+  ([ADR-006](docs/adr/ADR-006-cli-contract.md)) : `0` = aucun test flaky,
+  `1` = flakiness détectée, `2` = erreur d'analyse — un pipeline peut donc
+  conditionner un gate directement sur la stabilité de la suite.
+- **`--json`** : les rapports sérialisés depuis les modèles Pydantic,
+  preuves complètes incluses — le schéma de la CLI est le schéma des modèles.
 
-## Architecture
-
-A four-stage agent pipeline following the System 1 / System 2 dual-process
-pattern ([ADR-001](docs/adr/ADR-001-orchestration-pattern.md)): deterministic
-statistics where the volume is, LLM reasoning where the value is.
-
-```mermaid
-flowchart LR
-    A["junit.xml history"] --> B["Ingestion"]
-    B --> C["Detector\n(System 1)"]
-    C --> D["Classifier\n(System 1)"]
-    D --> E{"score ≥ 0.5?"}
-    E -- "escalate" --> F["Explainer → Recommender\n(System 2: LLM, graceful fallback)"]
-    E -- "stay deterministic" --> G["Explainer → Recommender\n(rule-based fallback only)"]
-    F --> H["FlakinessReport"]
-    G --> H
-```
-
-| Stage | Agent | System | Role |
-|---|---|---|---|
-| 1 | `DetectorAgent` | System 1 — deterministic, always runs | Scores flakiness: intermittency + flip rate + duration instability ([ADR-002](docs/adr/ADR-002-flakiness-scoring-heuristic.md)) |
-| 2 | `ClassifierAgent` | System 1 — deterministic, always runs | Names the probable cause: duration outliers, order splits, environment diffs ([ADR-003](docs/adr/ADR-003-cause-classification-heuristics.md)) |
-| 3 | `ExplainerAgent` | System 2 — LLM with deterministic fallback | Root-cause narrative grounded in System 1 evidence ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md)) |
-| 4 | `RecommenderAgent` | System 2 — LLM with deterministic fallback | Corrective action tailored from a per-cause playbook floor ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md)) |
-
-The `Orchestrator` chains the stages and owns the escalation decision
-([ADR-005](docs/adr/ADR-005-system2-escalation-threshold.md)): the LLM path
-is attempted only at or above a flakiness score of 0.5 — below it, System 2
-agents are pinned to their deterministic fallback, no LLM attempt even with
-a key configured. Report-level fields aggregate conservatively: a report
-labeled `system2_llm` guarantees every narrative field was LLM-produced.
-
-To enable the LLM enhancement layer: `pip install -e .[llm]` and set
-`ANTHROPIC_API_KEY` — nothing else changes; without it every stage runs its
-deterministic path, and the output shape is identical.
-
-## Quickstart (Windows / PowerShell)
+## Démo en local
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pip install -e .
-python -m pytest
+python -m pytest                        # 60 tests, zéro clé API
 
-# analyze the bundled sample CI history
-flakysense data/samples/ci_runs
-
-# machine-readable output, e.g. for a CI step or a dashboard
-flakysense data/samples/ci_runs --json
+flakysense data/samples/ci_runs         # historique d'exemple fourni (10 runs)
+flakysense data/samples/ci_runs --json  # sortie machine
 ```
 
-## Docker
-
-The image packages the CLI as a one-shot analysis job
-([ADR-007](docs/adr/ADR-007-container-packaging-scope.md)); CI never uses
-it — the core suite stays Docker-free by design.
+Ou via Docker ([ADR-007](docs/adr/ADR-007-container-packaging-scope.md)) :
 
 ```powershell
-# analyze the bundled sample history (builds the image on first run)
-docker compose run --rm flakysense
-
-# analyze your own CI artifacts
-docker run --rm -v C:\path\to\reports:/runs:ro flakysense
+docker compose run --rm flakysense                             # historique d'exemple
+docker run --rm -v C:\chemin\vers\reports:/runs:ro flakysense  # vos artefacts CI
 ```
 
-Exit codes propagate, so a pipeline can gate on flakiness directly. Set
-`ANTHROPIC_API_KEY` in the environment to enable the System 2 LLM path — the
-image already bundles the optional SDK.
+## Stack technique
 
-## Testing philosophy
+- **Python ≥ 3.12**, **Pydantic v2** pour tous les modèles — une seule
+  dépendance runtime.
+- **Ingestion JUnit XML** : le format que pytest, Playwright, Jest ou Maven
+  Surefire savent tous émettre.
+- **Couche LLM optionnelle** (Anthropic) : `pip install -e .[llm]` +
+  `ANTHROPIC_API_KEY` — rien d'autre ne change ; sans clé, chaque étage suit
+  son chemin déterministe.
+- **CI GitHub Actions** sans Docker ni clé API. Chaque décision de design est
+  documentée dans un ADR ([docs/adr/](docs/adr/)) ; ce que les tests ont
+  attrapé — et ce que cela aurait coûté — est consigné dans
+  [docs/bug-evidence.md](docs/bug-evidence.md).
 
-- **Zero API keys, by construction.** The full suite (60 tests) and CI run
-  green with no LLM access; an autouse fixture scrubs `ANTHROPIC_API_KEY`
-  suite-wide, and the LLM path is exercised through injected fake clients —
-  no network in tests, ever.
-- **Fixtures are documented scenarios, not random data.** Ten synthetic CI
-  runs encode one stable test and three flaky archetypes (timing, ordering,
-  environment) with known signatures; contract tests pin the fixtures to
-  their documentation (see [data/samples/README.md](data/samples/README.md)).
-- **Bugs are portfolio evidence.** What the tests caught, what it would have
-  cost, and where each fix is pinned: [docs/bug-evidence.md](docs/bug-evidence.md)
-  — including a verified counterfactual where ordering flakiness would have
-  been misdiagnosed as an environment issue.
+## Limites explicites
 
-## Design decisions
+- L'analyse exige un **historique de runs** : minimum 4 runs pour un score
+  non amorti. Un rapport JUnit isolé ne suffit pas.
+- Les heuristiques v1 sont calibrées sur des scénarios synthétiques
+  documentés ([data/samples/](data/samples/README.md)) ; sur un historique
+  réel volumineux, les seuils peuvent demander un réglage.
+- Sortie console et JSON uniquement — pas de dashboard ni de suivi dans le
+  temps à ce stade.
+- Sans la couche LLM, explications et recommandations restent des gabarits
+  déterministes — corrects, mais plus secs.
 
-| ADR | Decision |
-|---|---|
-| [ADR-001](docs/adr/ADR-001-orchestration-pattern.md) | System 1 / System 2 dual-process orchestration; LLM cost scales with flaky count, not test count |
-| [ADR-002](docs/adr/ADR-002-flakiness-scoring-heuristic.md) | Flakiness score: intermittency 0.4 + flip rate 0.4 + duration instability 0.2; detection threshold 0.3 |
-| [ADR-003](docs/adr/ADR-003-cause-classification-heuristics.md) | Per-cause heuristics, strongest wins, confidence floor — the classifier never guesses |
-| [ADR-004](docs/adr/ADR-004-system2-llm-integration.md) | Provider-neutral `LLMClient` protocol; env-gated activation; graceful degradation on any failure |
-| [ADR-005](docs/adr/ADR-005-system2-escalation-threshold.md) | Escalation threshold 0.5, owned by the orchestrator; conservative report aggregation |
-| [ADR-006](docs/adr/ADR-006-cli-contract.md) | Grep-style exit codes; JSON serialized from the models — the CLI schema is the model schema |
-| [ADR-007](docs/adr/ADR-007-container-packaging-scope.md) | Runtime-only CLI image; compose as demo harness; CI stays Docker-free |
+## Auteur
 
-## Project structure
+**Jérémy Bazan** — Ingénieur QA · AI-driven Quality —
+[LinkedIn](https://www.linkedin.com/in/jeremy-bazan/) ·
+[GitHub](https://github.com/BazanJeremy)
 
-```
-src/flakysense/
-├── models.py          # Pydantic v2 data models — the pipeline contract
-├── ingest/junit.py    # JUnit XML → TestRunRecord
-├── agents/            # detector, classifier, explainer, recommender
-├── llm.py             # LLMClient protocol + env-gated Anthropic client
-├── orchestrator.py    # stage chaining + escalation decision
-└── cli.py             # console entry point (also: python -m flakysense)
-data/samples/ci_runs/  # 10 synthetic CI runs, documented scenarios
-docs/adr/              # architecture decision records
-docs/bug-evidence.md   # what the tests caught, and why it mattered
-```
+FlakySense fait partie d'une série d'outils QA augmentés par l'IA — voir
+aussi [anomaly-sentinel](https://github.com/BazanJeremy/anomaly-sentinel).
 
-## License
+## Licence
 
-MIT
+[MIT](LICENSE)
