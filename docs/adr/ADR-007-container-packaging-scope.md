@@ -49,7 +49,7 @@ container plays. Forces:
 3. **Runtime CLI image + compose demo harness (chosen)** — Pros: container
    has exactly one job; CI constraint untouched; LLM enhancement available
    by env var without rebuilding. Cons: the image is not used by CI, so
-   image rot is only caught manually (accepted at portfolio scale).
+   image rot is only caught manually (accepted at this project's scale).
 
 ## Consequences
 
@@ -59,7 +59,7 @@ container plays. Forces:
   reviewers a one-liner demo.
 - **Negative:** the image is rebuilt/verified manually, not in CI (accepted:
   adding a Docker build job would contradict the constraint's spirit for a
-  portfolio project); baking `[llm]` in grows the image by the SDK's size.
+  solo project); baking `[llm]` in grows the image by the SDK's size.
 - **Follow-ups:** the senior README session documents the container as the
   recommended CI integration; if a dashboard service ever lands, it becomes
   a second compose service reusing this image.

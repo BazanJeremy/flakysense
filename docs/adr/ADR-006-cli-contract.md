@@ -61,6 +61,6 @@ Forces:
   without touching code.
 - **Negative:** console formatting is hand-rolled (no rich tables) — accepted
   as lean; JSON output embeds full run evidence, so large histories produce
-  large payloads (acceptable at portfolio scale).
+  large payloads (acceptable at this project's scale).
 - **Follow-ups:** the docker/compose session wraps this entry point; the
   senior README documents the exit-code contract for CI usage.

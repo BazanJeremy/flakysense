@@ -57,5 +57,5 @@ Method label: `rule_based_v1`.
 - **Negative:** the 0.4/0.4/0.2 weights and the 0.3 threshold are
   hand-tuned; real-world CI histories may need recalibration.
 - **Follow-ups:** revisit weights against real OSS CI data if the project
-  extends beyond the portfolio; the Classifier session decides whether to
+  extends beyond its current scope; the Classifier session decides whether to
   consume the per-signal values directly.

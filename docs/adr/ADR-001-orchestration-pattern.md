@@ -13,7 +13,7 @@ shape the orchestration design:
 1. **Volume asymmetry.** Detection and classification must process every test of
    every run (thousands of data points); explanation and recommendation only
    matter for the small subset of tests confirmed flaky.
-2. **Zero-API-key constraint** (portfolio-wide principle #1): the full pipeline
+2. **Zero-API-key constraint** (series-wide principle #1): the full pipeline
    and CI must run green with no LLM access. LLM calls are an enhancement layer,
    never a dependency.
 
@@ -47,10 +47,10 @@ once the scoring function exists; the S3 orchestrator applies it.
    model, maximum reasoning at each step. Cons: violates the zero-API-key
    principle; non-deterministic detection (the numbers a QA lead acts on must
    be reproducible); cost scales with total test count instead of flaky count.
-2. **Parallel independent agents (P3 pattern)** — Pros: proven in P3, fast.
+2. **Parallel independent agents (TestScribe pattern)** — Pros: proven in TestScribe, fast.
    Cons: the stages are causally dependent (classification consumes detection
    output; explanation consumes both), so parallelism buys little — and it
-   would demonstrate no orchestration progression over P3.
+   would demonstrate no orchestration progression over TestScribe.
 3. **System 1 / System 2 dual-process (chosen)** — Pros: determinism where the
    volume is, reasoning where the value is; bounded LLM cost; a real
    degraded-mode story; clean escalation semantics for the S3 orchestrator.

@@ -1,6 +1,6 @@
 # Bug Evidence Log
 
-Portfolio principle: **bugs found by tests are evidence, not embarrassment**
+Series-wide principle: **bugs found by tests are evidence, not embarrassment**
 — each entry records what surfaced the problem, what it would have cost, and
 where the fix is pinned so it cannot regress silently.
 
