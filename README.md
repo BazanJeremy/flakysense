@@ -23,23 +23,11 @@ actionnable : un score de flakiness, une cause probable, une explication
 fondée sur les preuves et une action corrective — lisibles par un lead QA,
 ou consommés directement par le pipeline.
 
-## L'approche : la statistique décide, l'IA raconte
+## Comment ça marche
 
 Un pipeline de quatre agents suivant le pattern System 1 / System 2
 ([ADR-001](docs/adr/ADR-001-orchestration-pattern.md)) : du déterminisme là
 où passe le volume, du raisonnement LLM là où est la valeur.
-
-```mermaid
-flowchart LR
-    A["Historique junit.xml"] --> B["Ingestion"]
-    B --> C["Détecteur\n(System 1)"]
-    C --> D["Classifieur\n(System 1)"]
-    D --> E{"score ≥ 0.5 ?"}
-    E -- "escalade" --> F["Explication → Recommandation\n(System 2 : LLM, repli garanti)"]
-    E -- "reste déterministe" --> G["Explication → Recommandation\n(règles uniquement)"]
-    F --> H["Rapport de flakiness"]
-    G --> H
-```
 
 **La décision « ce test est-il flaky ? » est 100 % déterministe**
 ([ADR-002](docs/adr/ADR-002-flakiness-scoring-heuristic.md)). Le score
@@ -63,6 +51,20 @@ API est configurée ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md),
 [ADR-005](docs/adr/ADR-005-system2-escalation-threshold.md)). Chaque étage a
 un repli déterministe : la suite complète (60 tests) et la CI tournent avec
 **zéro clé API**, et la sortie garde exactement la même forme.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A["Historique junit.xml"] --> B["Ingestion"]
+    B --> C["Détecteur\n(System 1)"]
+    C --> D["Classifieur\n(System 1)"]
+    D --> E{"score ≥ 0.5 ?"}
+    E -- "escalade" --> F["Explication → Recommandation\n(System 2 : LLM, repli garanti)"]
+    E -- "reste déterministe" --> G["Explication → Recommandation\n(règles uniquement)"]
+    F --> H["Rapport de flakiness"]
+    G --> H
+```
 
 ## Ce que ça rend
 
@@ -91,11 +93,11 @@ tests/test_users.py::test_user_profile_cache
   flakiness de [ReleaseGuard](https://github.com/BazanJeremy/ReleaseGuard), qui
   le fusionne avec tests et couverture en un verdict GO/NO-GO.
 
-## Démo en local
+## Démarrage rapide
 
-```powershell
+```bash
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+source .venv/bin/activate               # Windows PowerShell : .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pip install -e .
 python -m pytest                        # 60 tests, zéro clé API
@@ -106,12 +108,13 @@ flakysense data/samples/ci_runs --json  # sortie machine
 
 Ou via Docker ([ADR-007](docs/adr/ADR-007-container-packaging-scope.md)) :
 
-```powershell
-docker compose run --rm flakysense                             # historique d'exemple
-docker run --rm -v C:\chemin\vers\reports:/runs:ro flakysense  # vos artefacts CI
+```bash
+docker compose run --rm flakysense                            # historique d'exemple
+docker run --rm -v /chemin/vers/reports:/runs:ro flakysense   # vos artefacts CI
+# Windows PowerShell : docker run --rm -v C:\chemin\vers\reports:/runs:ro flakysense
 ```
 
-## Stack technique
+## Décisions de conception
 
 - **Python ≥ 3.12**, **Pydantic v2** pour tous les modèles — une seule
   dépendance runtime.
@@ -125,7 +128,7 @@ docker run --rm -v C:\chemin\vers\reports:/runs:ro flakysense  # vos artefacts C
   attrapé — et ce que cela aurait coûté — est consigné dans
   [docs/bug-evidence.md](docs/bug-evidence.md).
 
-## Limites explicites
+## Limites connues
 
 - L'analyse exige un **historique de runs** : minimum 4 runs pour un score
   non amorti. Un rapport JUnit isolé ne suffit pas.
