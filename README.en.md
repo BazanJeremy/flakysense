@@ -124,7 +124,7 @@ image already bundles the optional SDK.
   runs encode one stable test and three flaky archetypes (timing, ordering,
   environment) with known signatures; contract tests pin the fixtures to
   their documentation (see [data/samples/README.md](data/samples/README.md)).
-- **Bugs are portfolio evidence.** What the tests caught, what it would have
+- **Bugs are documented evidence.** What the tests caught, what it would have
   cost, and where each fix is pinned: [docs/bug-evidence.md](docs/bug-evidence.md)
   — including a verified counterfactual where ordering flakiness would have
   been misdiagnosed as an environment issue.
