@@ -1,10 +1,13 @@
 # FlakySense
 
-> Flaky test intelligence agent — detects, classifies, and explains flaky
-> tests from CI run history using log analysis, temporal correlation, and
-> multi-step AI agent orchestration.
+**Flaky test intelligence agent — detects, classifies, and explains flaky tests from CI run history using log analysis, temporal correlation, and multi-step AI agent orchestration.**
 
-🇫🇷 [Version française](README.md)
+[![CI](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml/badge.svg)](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-60%20passing-brightgreen?logo=pytest)](tests/)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue?logo=python)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+
+> 🇫🇷 [Version française](README.md)
 
 **Status:** ✅ v1 complete — detection pipeline, CLI, and Docker packaging
 delivered. Part of a series of AI-augmented QA tools — see also

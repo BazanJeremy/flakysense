@@ -1,10 +1,13 @@
 # FlakySense
 
-> Diagnostic d'instabilité de suite de tests — détecte, classifie et explique
-> les tests flaky à partir de l'historique CI, par analyse statistique
-> déterministe, augmentée d'une couche IA optionnelle.
+**Diagnostic d'instabilité de suite de tests — détecte, classifie et explique les tests flaky à partir de l'historique CI, par analyse statistique déterministe, augmentée d'une couche IA optionnelle.**
 
-🇬🇧 [English version](README.en.md)
+[![CI](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml/badge.svg)](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-60%20passing-brightgreen?logo=pytest)](tests/)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue?logo=python)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+
+> 🇬🇧 [English version](README.en.md)
 
 ## Le problème
 
