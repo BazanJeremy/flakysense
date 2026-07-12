@@ -87,6 +87,9 @@ tests/test_users.py::test_user_profile_cache
   conditionner un gate directement sur la stabilité de la suite.
 - **`--json`** : les rapports sérialisés depuis les modèles Pydantic,
   preuves complètes incluses — le schéma de la CLI est le schéma des modèles.
+- **Intégration en aval** : le rapport `--json` alimente directement l'entrée
+  flakiness de [ReleaseGuard](https://github.com/BazanJeremy/ReleaseGuard), qui
+  le fusionne avec tests et couverture en un verdict GO/NO-GO.
 
 ## Démo en local
 
@@ -134,14 +137,24 @@ docker run --rm -v C:\chemin\vers\reports:/runs:ro flakysense  # vos artefacts C
 - Sans la couche LLM, explications et recommandations restent des gabarits
   déterministes — corrects, mais plus secs.
 
+## Projets associés
+
+Ces outils partagent les mêmes principes : **le déterministe d'abord, l'IA là où elle apporte — le QA reste l'arbitre.** Tous tournent en local, aucune clé API requise.
+
+| Projet | Focus |
+|---|---|
+| [EvalForge](https://github.com/BazanJeremy/EvalForge) | Évaluation de LLM & calibration du juge |
+| [ReleaseGuard](https://github.com/BazanJeremy/ReleaseGuard) | Verrou de release GO/NO-GO explicable |
+| [FlakySense](https://github.com/BazanJeremy/flakysense) **← ce repo** | Diagnostic statistique des tests flaky |
+| [Anomaly Sentinel](https://github.com/BazanJeremy/anomaly-sentinel) | Tester les IA de détection d'anomalies (medtech · fintech) |
+| [TestScribe](https://github.com/BazanJeremy/testscribe) | Enrichissement de bug reports assisté par IA |
+| [SkyGuard](https://github.com/BazanJeremy/skyguard) | Quality gate sécurité pour systèmes critiques avioniques |
+
 ## Auteur
 
 **Jérémy Bazan** — Ingénieur QA · AI-driven Quality —
 [LinkedIn](https://www.linkedin.com/in/jeremy-bazan/) ·
 [GitHub](https://github.com/BazanJeremy)
-
-FlakySense fait partie d'une série d'outils QA augmentés par l'IA — voir
-aussi [anomaly-sentinel](https://github.com/BazanJeremy/anomaly-sentinel).
 
 ## Licence
 

@@ -10,8 +10,7 @@
 > 🇫🇷 [Version française](README.md)
 
 **Status:** ✅ v1 complete — detection pipeline, CLI, and Docker packaging
-delivered. Part of a series of AI-augmented QA tools — see also
-[anomaly-sentinel](https://github.com/BazanJeremy/anomaly-sentinel).
+delivered.
 
 ## Why
 
@@ -43,6 +42,10 @@ Exit codes follow the grep convention
 `1` = flaky tests found — so a pipeline can gate on flakiness directly —
 `2` = analysis error. `--json` emits the same reports serialized straight
 from the Pydantic models, full run evidence included.
+
+The `--json` report also feeds directly into
+[ReleaseGuard](https://github.com/BazanJeremy/ReleaseGuard)'s flakiness input,
+which fuses it with test results and coverage into a GO/NO-GO verdict.
 
 ## Architecture
 
@@ -155,6 +158,19 @@ data/samples/ci_runs/  # 10 synthetic CI runs, documented scenarios
 docs/adr/              # architecture decision records
 docs/bug-evidence.md   # what the tests caught, and why it mattered
 ```
+
+## Related projects
+
+These tools share the same principles: **deterministic first, AI where it earns its place — the QA stays the arbiter.** All run locally, no API keys required.
+
+| Project | Focus |
+|---|---|
+| [EvalForge](https://github.com/BazanJeremy/EvalForge) | LLM evaluation & judge calibration |
+| [ReleaseGuard](https://github.com/BazanJeremy/ReleaseGuard) | Explainable GO/NO-GO release gate |
+| [FlakySense](https://github.com/BazanJeremy/flakysense) **← this repo** | Statistical flaky-test diagnosis |
+| [Anomaly Sentinel](https://github.com/BazanJeremy/anomaly-sentinel) | Testing AI anomaly-detection systems (medtech · fintech) |
+| [TestScribe](https://github.com/BazanJeremy/testscribe) | AI-assisted bug report enrichment |
+| [SkyGuard](https://github.com/BazanJeremy/skyguard) | Security quality gate for critical avionics systems |
 
 ## License
 
