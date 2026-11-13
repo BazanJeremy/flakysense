@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from flakysense import cli
 from flakysense.cli import EXIT_CLEAN, EXIT_ERROR, EXIT_FLAKY, main
 from flakysense.orchestrator import Orchestrator
@@ -42,6 +44,45 @@ def test_stable_history_exits_0(tmp_path, capsys):
 
     assert exit_code == EXIT_CLEAN
     assert "no flaky tests detected" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("bad_time", ["abc", "-1"])
+def test_unparseable_duration_exits_2_not_1(tmp_path, capsys, bad_time):
+    # Bug evidence #4: a crash exits 1 by Python's default, and 1 means
+    # "flaky tests found" here.
+    run_dir = tmp_path / "run_01"
+    run_dir.mkdir()
+    (run_dir / "junit.xml").write_text(
+        '<testsuite name="s" timestamp="2026-11-13T10:00:00">'
+        f'<testcase classname="tests.test_a" name="test_x" time="{bad_time}"/>'
+        "</testsuite>",
+        encoding="utf-8",
+    )
+
+    exit_code = main([str(tmp_path)])
+
+    captured = capsys.readouterr()
+    assert exit_code == EXIT_ERROR
+    assert captured.out == ""
+    assert "error:" in captured.err
+    assert bad_time in captured.err
+
+
+def test_unexpected_exception_exits_2_not_1(tmp_path, monkeypatch, capsys):
+    # The last-resort guard: whatever breaks, the exit code never says
+    # "flaky tests found".
+    def boom(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("flakysense.cli.parse_junit_dir", boom)
+
+    exit_code = main([str(tmp_path)])
+
+    captured = capsys.readouterr()
+    assert exit_code == EXIT_ERROR
+    assert captured.out == ""
+    assert "internal error" in captured.err
+    assert "RuntimeError: boom" in captured.err
 
 
 def test_unusable_input_exits_2_with_stderr_message(tmp_path, capsys):
