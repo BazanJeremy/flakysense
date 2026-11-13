@@ -56,3 +56,26 @@ where the fix is pinned so it cannot regress silently.
 - **Pinned by:** `dependencies = ["pydantic>=2.7"]` in `pyproject.toml`;
   the image is verified live per ADR-007 (compose run reproduces the local
   report with the correct exit code).
+
+## 4. A crash left through the "flaky tests found" exit code
+
+- **Sprint:** post-S3 audit (2026-11-13)
+- **Surfaced by:** a read-through of the JUnit parser, then reproduced on
+  the installed CLI before any fix. The suite never fed the parser a
+  malformed `time` attribute.
+- **The problem:** `parse_junit_file` called `float(case.get("time"))`
+  directly, and `main` caught `JUnitParseError` only. A report carrying
+  `time="abc"` raised `ValueError`; `time="-1"` raised a Pydantic
+  `ValidationError` (`duration_s` is `ge=0`). Both escaped as tracebacks,
+  and Python exits 1 on an uncaught exception. Measured on the CLI: exit
+  **1** in both cases, where ADR-006 promises 2.
+- **Why it mattered:** 1 means "flaky tests found". A CI gating on that
+  code would have blamed the test suite for a failure of the tool, and
+  exit 2 — "the analysis could not run" — was unreachable for this whole
+  class of input.
+- **Pinned by:** `_case_duration` raises `JUnitParseError` on a
+  non-numeric value, a negative value or NaN; `main` gained a last-resort guard that
+  prints the traceback and exits 2 on anything unexpected, so a crash can
+  no longer borrow a verdict's exit code. Three tests in
+  `tests/test_cli.py` (suite: 60 -> 63). The same two reports now exit
+  **2**; the sample history still exits 1.

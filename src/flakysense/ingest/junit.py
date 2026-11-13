@@ -59,7 +59,7 @@ def parse_junit_file(path: str | Path, run_id: str | None = None) -> list[TestRu
                     test_id=_case_test_id(case, path),
                     run_id=resolved_run_id,
                     status=status,
-                    duration_s=float(case.get("time", 0.0)),
+                    duration_s=_case_duration(case, path),
                     started_at=started_at,
                     execution_index=index,
                     environment=properties,
@@ -87,6 +87,22 @@ def parse_junit_dir(path: str | Path) -> list[TestRunRecord]:
     for xml_file in xml_files:
         records.extend(parse_junit_file(xml_file))
     return records
+
+
+def _case_duration(case: ET.Element, path: Path) -> float:
+    """Read ``time`` as a non-negative duration, or raise ``JUnitParseError``.
+
+    A bare ``float()`` would let a bad value escape as ``ValueError``, which
+    the CLI does not catch: the run would exit 1, "flaky tests found".
+    """
+    raw = case.get("time", "0.0")
+    try:
+        duration = float(raw)
+    except ValueError as exc:
+        raise JUnitParseError(f"{path}: bad testcase time {raw!r}") from exc
+    if not duration >= 0:  # also rejects NaN
+        raise JUnitParseError(f"{path}: bad testcase time {raw!r}")
+    return duration
 
 
 def _suite_timestamp(suite: ET.Element, path: Path) -> datetime:

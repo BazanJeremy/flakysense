@@ -3,7 +3,7 @@
 **Flaky test intelligence agent — detects, classifies, and explains flaky tests from CI run history using log analysis, temporal correlation, and multi-step AI agent orchestration.**
 
 [![CI](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml/badge.svg)](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-60%20passing-brightgreen?logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/tests-63%20passing-brightgreen?logo=pytest)](tests/)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue?logo=python)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -134,7 +134,7 @@ image already bundles the optional SDK.
 
 ## Test strategy
 
-- **Zero API keys, by construction.** The full suite (60 tests) and CI run
+- **Zero API keys, by construction.** The full suite (63 tests) and CI run
   green with no LLM access; an autouse fixture scrubs `ANTHROPIC_API_KEY`
   suite-wide, and the LLM path is exercised through injected fake clients —
   no network in tests, ever.

@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import traceback
 
 from flakysense.ingest.junit import JUnitParseError, parse_junit_dir
 from flakysense.models import FlakinessReport, TestRunRecord
@@ -22,6 +23,22 @@ EXIT_ERROR = 2
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the analysis; never let a crash leave through the "flaky" exit code.
+
+    An uncaught exception makes Python exit 1, and 1 means "flaky tests
+    found": a CI gating on it would blame the test suite for a tool failure.
+    Anything unexpected is reported with its traceback and mapped to exit 2.
+    argparse's ``SystemExit`` is not an ``Exception`` and passes through.
+    """
+    try:
+        return _run(argv)
+    except Exception:
+        traceback.print_exc()
+        print("error: internal error (see traceback above)", file=sys.stderr)
+        return EXIT_ERROR
+
+
+def _run(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
 
     try:
