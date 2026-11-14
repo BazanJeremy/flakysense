@@ -3,7 +3,7 @@
 **Diagnostic d'instabilité de suite de tests — détecte, classifie et explique les tests flaky à partir de l'historique CI, par analyse statistique déterministe, augmentée d'une couche IA optionnelle.**
 
 [![CI](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml/badge.svg)](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-63%20passing-brightgreen?logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/tests-66%20passing-brightgreen?logo=pytest)](tests/)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue?logo=python)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -49,7 +49,7 @@ confiance le classifieur répond `unknown`. Il ne devine jamais.
 peuvent passer par un LLM, uniquement si le score atteint 0.5 et qu'une clé
 API est configurée ([ADR-004](docs/adr/ADR-004-system2-llm-integration.md),
 [ADR-005](docs/adr/ADR-005-system2-escalation-threshold.md)). Chaque étage a
-un repli déterministe : la suite complète (63 tests) et la CI tournent avec
+un repli déterministe : la suite complète (66 tests) et la CI tournent avec
 **zéro clé API**, et la sortie garde exactement la même forme.
 
 ## Architecture
@@ -72,9 +72,9 @@ flowchart LR
 $ flakysense data/samples/ci_runs
 FlakySense - analyzed 5 tests across 10 runs: 3 flaky
 
-tests/test_users.py::test_user_profile_cache
+tests.test_users::test_user_profile_cache
   flakiness 0.70 | cause: ordering (confidence 0.80) | path: system1_fallback
-  explanation:    Test 'tests/test_users.py::test_user_profile_cache' failed 4 of 10
+  explanation:    Test 'tests.test_users::test_user_profile_cache' failed 4 of 10
                   recorded runs (flakiness score 0.70). Probable cause: ordering
                   (confidence 0.80). Evidence: failures only at suite position(s) [3],
                   passes only at [2].
@@ -100,7 +100,7 @@ python -m venv .venv
 source .venv/bin/activate               # Windows PowerShell : .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pip install -e .
-python -m pytest                        # 63 tests, zéro clé API
+python -m pytest                        # 66 tests, zéro clé API
 
 flakysense data/samples/ci_runs         # historique d'exemple fourni (10 runs)
 flakysense data/samples/ci_runs --json  # sortie machine

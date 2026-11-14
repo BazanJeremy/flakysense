@@ -46,7 +46,7 @@ class TestRunRecord(BaseModel):
 
     test_id: str = Field(
         min_length=1,
-        description="pytest node id, e.g. 'tests/test_api.py::test_login'",
+        description="JUnit classname and name, e.g. 'tests.test_api::test_login'",
     )
     run_id: str = Field(
         min_length=1,

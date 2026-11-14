@@ -38,8 +38,8 @@ def test_maps_metadata_onto_records():
         for r in records
     )
     by_name = {r.test_id: r for r in records}
-    cache = by_name["tests/test_users.py::test_user_profile_cache"]
-    bulk = by_name["tests/test_data_import.py::test_bulk_import"]
+    cache = by_name["tests.test_users::test_user_profile_cache"]
+    bulk = by_name["tests.test_data_import::test_bulk_import"]
     assert cache.execution_index > bulk.execution_index  # order B preserved
     assert cache.status is TestStatus.FAILED
     assert "stale cached entry" in cache.error_message
@@ -75,3 +75,49 @@ def test_rejects_report_without_testcases(tmp_path):
 def test_rejects_directory_without_reports(tmp_path):
     with pytest.raises(JUnitParseError, match="no junit.xml"):
         parse_junit_dir(tmp_path)
+
+
+_TWO_CLASSES_ONE_FILE = """\
+<testsuite name="pytest" timestamp="2026-11-14T05:00:00">
+  <testcase classname="tests.test_api.TestLogin" name="test_ok"
+            file="tests/test_api.py" time="0.01"/>
+  <testcase classname="tests.test_api.TestLogout" name="test_ok"
+            file="tests/test_api.py" time="0.01"/>
+</testsuite>
+"""
+
+
+def test_same_name_in_two_classes_stays_two_tests(tmp_path):
+    # Bug evidence #5: the identity used to be ``file::name`` whenever a
+    # ``file`` attribute was present, which dropped the class. Two tests
+    # then shared one identity and their histories were merged.
+    report = tmp_path / "junit.xml"
+    report.write_text(_TWO_CLASSES_ONE_FILE, encoding="utf-8")
+
+    ids = [r.test_id for r in parse_junit_file(report)]
+
+    assert len(set(ids)) == 2
+
+
+def test_identity_is_classname_and_name_whatever_the_file_attribute(tmp_path):
+    # ADR-008, the contract ReleaseGuard joins on: ``classname::name``,
+    # verbatim, with or without a ``file`` attribute.
+    report = tmp_path / "junit.xml"
+    report.write_text(_TWO_CLASSES_ONE_FILE, encoding="utf-8")
+
+    assert [r.test_id for r in parse_junit_file(report)] == [
+        "tests.test_api.TestLogin::test_ok",
+        "tests.test_api.TestLogout::test_ok",
+    ]
+
+
+def test_identity_falls_back_to_file_without_a_classname(tmp_path):
+    report = tmp_path / "junit.xml"
+    report.write_text(
+        '<testsuite name="s" timestamp="2026-11-14T05:00:00">'
+        '<testcase name="test_x" file="tests/test_a.py" time="0.01"/>'
+        "</testsuite>",
+        encoding="utf-8",
+    )
+
+    assert [r.test_id for r in parse_junit_file(report)] == ["tests/test_a.py::test_x"]

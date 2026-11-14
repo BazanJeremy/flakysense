@@ -11,10 +11,10 @@ CI_RUNS = Path(__file__).resolve().parents[1] / "data" / "samples" / "ci_runs"
 
 # Detector v1 scores on the fixture scenarios (see ADR-005): the borderline
 # test sits below the 0.5 escalation threshold, the other two above it.
-BORDERLINE_ID = "tests/test_reports.py::test_report_export"  # score 0.497
+BORDERLINE_ID = "tests.test_reports::test_report_export"  # score 0.497
 ESCALATED_IDS = {
-    "tests/test_payment.py::test_payment_gateway_timeout",  # score 0.673
-    "tests/test_users.py::test_user_profile_cache",  # score 0.703
+    "tests.test_payment::test_payment_gateway_timeout",  # score 0.673
+    "tests.test_users::test_user_profile_cache",  # score 0.703
 }
 FLAKY_IDS = sorted(ESCALATED_IDS | {BORDERLINE_ID})
 

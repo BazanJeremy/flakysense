@@ -21,7 +21,7 @@ def record_factory():
 
     def make(**overrides) -> TestRunRecord:
         defaults = dict(
-            test_id="tests/test_demo.py::test_example",
+            test_id="tests.test_demo::test_example",
             run_id="run_01",
             status=TestStatus.PASSED,
             duration_s=0.1,

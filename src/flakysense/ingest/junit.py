@@ -130,6 +130,8 @@ def _case_test_id(case: ET.Element, path: Path) -> str:
     name = case.get("name")
     if not name:
         raise JUnitParseError(f"{path}: <testcase> missing name attribute")
-    # pytest-style nodeid when the file is known; classname otherwise.
-    prefix = case.get("file") or case.get("classname") or "unknown"
+    # ADR-008: ``classname`` first, verbatim. It carries the class, which a
+    # ``file`` attribute does not: preferring ``file`` merged the histories
+    # of same-named tests from different classes (bug evidence #5).
+    prefix = case.get("classname") or case.get("file") or "unknown"
     return f"{prefix}::{name}"

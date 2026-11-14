@@ -167,7 +167,7 @@ def test_classifies_documented_fixture_causes():
     }
 
     assert causes == {
-        "tests/test_payment.py::test_payment_gateway_timeout": FlakyCause.TIMING,
-        "tests/test_users.py::test_user_profile_cache": FlakyCause.ORDERING,
-        "tests/test_reports.py::test_report_export": FlakyCause.ENVIRONMENT,
+        "tests.test_payment::test_payment_gateway_timeout": FlakyCause.TIMING,
+        "tests.test_users::test_user_profile_cache": FlakyCause.ORDERING,
+        "tests.test_reports::test_report_export": FlakyCause.ENVIRONMENT,
     }
