@@ -101,7 +101,7 @@ def test_flags_exactly_the_documented_flaky_fixtures():
     assert len(detections) == 5
     flagged = {d.test_id for d in detections if d.is_flaky}
     assert flagged == {
-        "tests/test_payment.py::test_payment_gateway_timeout",
-        "tests/test_users.py::test_user_profile_cache",
-        "tests/test_reports.py::test_report_export",
+        "tests.test_payment::test_payment_gateway_timeout",
+        "tests.test_users::test_user_profile_cache",
+        "tests.test_reports::test_report_export",
     }

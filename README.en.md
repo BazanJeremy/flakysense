@@ -3,7 +3,7 @@
 **Flaky test intelligence agent — detects, classifies, and explains flaky tests from CI run history using log analysis, temporal correlation, and multi-step AI agent orchestration.**
 
 [![CI](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml/badge.svg)](https://github.com/BazanJeremy/flakysense/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-63%20passing-brightgreen?logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/tests-66%20passing-brightgreen?logo=pytest)](tests/)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue?logo=python)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -64,9 +64,9 @@ flowchart LR
 $ flakysense data/samples/ci_runs
 FlakySense - analyzed 5 tests across 10 runs: 3 flaky
 
-tests/test_users.py::test_user_profile_cache
+tests.test_users::test_user_profile_cache
   flakiness 0.70 | cause: ordering (confidence 0.80) | path: system1_fallback
-  explanation:    Test 'tests/test_users.py::test_user_profile_cache' failed 4 of 10
+  explanation:    Test 'tests.test_users::test_user_profile_cache' failed 4 of 10
                   recorded runs (flakiness score 0.70). Probable cause: ordering
                   (confidence 0.80). Evidence: failures only at suite position(s) [3],
                   passes only at [2].
@@ -131,10 +131,11 @@ image already bundles the optional SDK.
 | [ADR-005](docs/adr/ADR-005-system2-escalation-threshold.md) | Escalation threshold 0.5, owned by the orchestrator; conservative report aggregation |
 | [ADR-006](docs/adr/ADR-006-cli-contract.md) | Grep-style exit codes; JSON serialized from the models — the CLI schema is the model schema |
 | [ADR-007](docs/adr/ADR-007-container-packaging-scope.md) | Runtime-only CLI image; compose as demo harness; CI stays Docker-free |
+| [ADR-008](docs/adr/ADR-008-test-identity.md) | Test identity is `classname::name`, verbatim — it keeps the class and does not depend on the JUnit family |
 
 ## Test strategy
 
-- **Zero API keys, by construction.** The full suite (63 tests) and CI run
+- **Zero API keys, by construction.** The full suite (66 tests) and CI run
   green with no LLM access; an autouse fixture scrubs `ANTHROPIC_API_KEY`
   suite-wide, and the LLM path is exercised through injected fake clients —
   no network in tests, ever.

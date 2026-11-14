@@ -79,3 +79,26 @@ where the fix is pinned so it cannot regress silently.
   no longer borrow a verdict's exit code. Three tests in
   `tests/test_cli.py` (suite: 60 -> 63). The same two reports now exit
   **2**; the sample history still exits 1.
+
+## 5. Two tests in two classes were one test
+
+- **Sprint:** post-S3 audit (2026-11-14)
+- **Surfaced by:** wiring FlakySense and ReleaseGuard back to back on
+  reports produced by a real pytest run, instead of the hand-built fixtures.
+- **The problem:** the identity was `file::name` whenever a `<testcase>`
+  carried a `file` attribute. That drops the class. Measured with pytest
+  9.1.1 and `junit_family=xunit1`, on a file holding `TestLogin.test_ok`
+  (fails every other run) and `TestLogout.test_ok` (always passes): one
+  report instead of two, 12 records for 6 runs, 3 failures among 9 passes.
+- **Why it mattered:** the histories of unrelated tests were merged, so a
+  stable test diluted the score of a flaky one, or lent it its flakiness.
+  And the identity changed with a JUnit option: pytest's default report has
+  no `file` attribute, so the same suite had another identity there — which
+  is also why ReleaseGuard's join found nothing on real reports.
+- **Why it hid:** every fixture under `data/samples/` carries `file` and
+  none has two classes in one file.
+- **Pinned by:** [ADR-008](adr/ADR-008-test-identity.md) — the identity is
+  `classname::name`, verbatim. Three tests in `tests/test_ingest.py`
+  (suite: 63 -> 66). Measured after the fix on the same reports: one
+  report, `tests.test_api.TestLogin::test_ok`, with its own 6 records; the
+  stable `TestLogout.test_ok` is a separate test and is no longer mixed in.

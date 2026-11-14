@@ -16,7 +16,7 @@ def test_naive_started_at_is_rejected(record_factory):
 def test_flakiness_score_is_bounded():
     with pytest.raises(ValidationError):
         FlakinessDetection(
-            test_id="tests/test_demo.py::test_example",
+            test_id="tests.test_demo::test_example",
             score=1.5,
             is_flaky=True,
             evidence=[],

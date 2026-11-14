@@ -12,9 +12,9 @@ from flakysense.orchestrator import Orchestrator
 CI_RUNS = Path(__file__).resolve().parents[1] / "data" / "samples" / "ci_runs"
 
 FLAKY_IDS = [
-    "tests/test_payment.py::test_payment_gateway_timeout",
-    "tests/test_reports.py::test_report_export",
-    "tests/test_users.py::test_user_profile_cache",
+    "tests.test_payment::test_payment_gateway_timeout",
+    "tests.test_reports::test_report_export",
+    "tests.test_users::test_user_profile_cache",
 ]
 
 _STABLE_JUNIT = """<?xml version="1.0"?>
