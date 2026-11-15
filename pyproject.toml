@@ -15,7 +15,7 @@ flakysense = "flakysense.cli:main"
 
 [project.optional-dependencies]
 # System 2 enhancement layer (ADR-004) — never required by tests or CI.
-llm = ["anthropic>=0.40"]
+llm = ["anthropic>=0.78"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

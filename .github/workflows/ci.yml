@@ -5,7 +5,27 @@ on:
     branches: [main]
   pull_request:
 
+# Least privilege: no job here writes to the repository. A job that needs
+# more declares it itself.
+permissions:
+  contents: read
+
 jobs:
+  # requires-python is >=3.12: the declared floor is tested, not assumed.
+  # A separate job, so the required check `test` keeps its name.
+  test-py312:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: pip install -e .
+      - run: python -m pytest
+        env:
+          PYTHONHASHSEED: "0"
+
   test:
     runs-on: ubuntu-latest
     steps:
